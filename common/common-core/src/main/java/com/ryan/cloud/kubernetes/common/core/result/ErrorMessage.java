@@ -21,5 +21,5 @@ public interface ErrorMessage {
      *
      * @return 响应信息
      */
-    String message();
+    String getMessage();
 }
