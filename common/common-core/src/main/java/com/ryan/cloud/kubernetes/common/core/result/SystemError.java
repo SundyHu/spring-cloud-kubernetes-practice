@@ -13,7 +13,7 @@ public enum SystemError implements ErrorMessage {
      * SUCCESS：操作成功,
      * FAILURE：操作失败
      */
-    SUCCESS(1, "操作成功"), FAILURE(0, "操作失败");
+    SUCCESS(1, "操作成功"), FAILURE(0, "操作失败"), SERVICE_FALLBACK(-11000, "服务熔断");
 
     private final Integer code;
 

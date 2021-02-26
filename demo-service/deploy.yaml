@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: demo-service
+  labels:
+    app: demo-service
+spec:
+  selector:
+    matchLabels:
+      app: demo-service
+  replicas: 1
+  template:
+    metadata:
+      name: demo-service
+      labels:
+        app: demo-service
+    spec:
+      containers:
+        - name: demo-service
+          image: registry.cn-hangzhou.aliyuncs.com/james-k8s/demo-service:1.0.0-SNAPSHOT
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: demo-service
+  labels:
+    app: demo-service
+spec:
+  ports:
+    - port: 8080
+      targetPort: 8080
+      protocol: TCP
+  type: NodePort
+
