@@ -1,0 +1,10 @@
+server:
+  port: 9000
+spring:
+  application:
+    name: @artifactId@
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'

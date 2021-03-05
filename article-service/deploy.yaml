@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: article-service
+  labels:
+    app: article-service
+spec:
+  selector:
+    matchLabels:
+      app: article-service
+  template:
+    metadata:
+      name: article-service
+      labels:
+        app: article-service
+    spec:
+      containers:
+        - name: article-service
+          image: registry.cn-hangzhou.aliyuncs.com/james-k8s/article-service:1.0.0-SNAPSHOT
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 9000
+              protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: article-service
+  labels:
+    app: article-service
+spec:
+  selector:
+    app: article-service
+  ports:
+    - port: 9000
+      targetPort: 9000
+      protocol: TCP
+  type: NodePort
