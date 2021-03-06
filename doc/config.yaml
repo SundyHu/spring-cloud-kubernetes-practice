@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: demo-service
+  namespace: default
+data:
+  application.yml: |-
+    demo:
+      name: "This is my test!"
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: redis-secret
+  namespace: default
+data:
+  redis.host: "OK"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: article-service
+  namespace: default
+data:
+  application.yml: |-
+    redis:
+      host: 172.17.18.25
