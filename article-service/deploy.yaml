@@ -1,0 +1,74 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: article-service
+  labels:
+    app: article-service
+spec:
+  selector:
+    matchLabels:
+      app: article-service
+  template:
+    metadata:
+      name: article-service
+      labels:
+        app: article-service
+    spec:
+      containers:
+        - name: article-service
+          image: registry.cn-hangzhou.aliyuncs.com/james-k8s/article-service:1.0.3-SNAPSHOT
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 9000
+              protocol: TCP
+          env:
+            - name: REDIS-HOST
+              value: redis
+            - name: REDIS-PASSWORD
+              value: "098a4d9f"
+            - name: MYSQL-HOST
+              value: mysql
+            - name: MYSQL-USERNAME
+              value: "root"
+            - name: MYSQL-PASSWORD
+              value: "123456"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: article-service
+  labels:
+    app: article-service
+spec:
+  selector:
+    app: article-service
+  ports:
+    - port: 9000
+      targetPort: 9000
+      protocol: TCP
+      nodePort: 30000
+  type: NodePort
+---
+# 创建在pod只读角色
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: pod-reader-cluster
+rules:
+  - apiGroups: [""] # "" 指定核心 API 组
+    resources: ["pods","endpoints","services","configmaps"]
+    verbs: ["get", "watch", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+# 此角色绑定使得用户 "jane" 能够读取 "default" 命名空间中的 Pods
+kind: ClusterRoleBinding
+metadata:
+  name: read-pods-cluster
+subjects:
+  - kind: Group
+    name: system:serviceaccounts
+    apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: ClusterRole #this must be Role or ClusterRole
+  name: pod-reader-cluster # 这里的名称必须与你想要绑定的 Role 或 ClusterRole 名称一致
+  apiGroup: rbac.authorization.k8s.io
