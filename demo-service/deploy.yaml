@@ -30,6 +30,8 @@ metadata:
   labels:
     app: demo-service
 spec:
+  selector:
+    app: demo-service
   ports:
     - port: 8080
       targetPort: 8080
