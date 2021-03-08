@@ -1,0 +1,18 @@
+server:
+  port: 9000
+spring:
+  application:
+    name: @artifactId@
+  datasource:
+    type: com.zaxxer.hikari.HikariDataSource
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://${MYSQL-HOST}:3306/sc-article?characterEncoding=utf8&connectTimeout=1000&socketTimeout=3000&autoReconnect=true&useUnicode=true&useSSL=false&serverTimezone=Asia/Shanghai
+    username: ${MYSQL-USERNAME:root}
+    password: ${MYSQL-PASSWORD:123456}
+mybatis-plus:
+  mapper-locations: classpath:/mapper/*Mapper.xml
+  configuration:
+    cache-enabled: false
+    map-underscore-to-camel-case: false
+  global-config:
+    banner: false

@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: product-service
+  namespace: sc-kubernetes
+  labels:
+    app: product-service
+spec:
+  selector:
+    matchLabels:
+      app: product-service
+  template:
+    metadata:
+      namespace: sc-kubernetes
+      name: product-service
+      labels:
+        app: product-service
+    spec:
+      containers:
+        - name: product-service
+          image: registry.cn-hangzhou.aliyuncs.com/james-k8s/product-service:1.0.2-SNAPSHOT
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 9000
+          env:
+            - name: MYSQL-HOST
+              value: "mysql-nfs.default"
+            - name: MYSQL-USERNAME
+              value: root
+            - name: MYSQL-PASSWORD
+              value: "123456"

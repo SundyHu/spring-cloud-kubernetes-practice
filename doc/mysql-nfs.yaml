@@ -1,0 +1,92 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  namespace: default
+  name: mysql-pv
+  labels:
+    app: mysql-pv
+spec:
+  volumeMode: Filesystem
+  capacity:
+    storage: 2Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: slow
+  mountOptions:
+    - hard
+    - nfsvers=4.1
+  nfs:
+    path: /data/k8snfs/mysql/data
+    server: 192.168.2.107
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mysql-pvc
+  namespace: default
+  labels:
+    app: mysql-pvc
+spec:
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: slow
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  namespace: default
+  name: mysql-nfs
+  labels:
+    app: mysql-nfs
+spec:
+  selector:
+    matchLabels:
+      app: mysql-nfs
+  serviceName: "mysql-nfs"
+  template:
+    metadata:
+      name: mysql-nfs
+      labels:
+        app: mysql-nfs
+    spec:
+      containers:
+        - name: mysql-nfs
+          image: mysql:5.7
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 3306
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              value: "123456"
+          volumeMounts:
+            - mountPath: /var/lib/mysql
+              name: mysql-data
+            - mountPath: /etc/localtime
+              name: tz
+              subPath: Shanghai
+      volumes:
+        - name: mysql-data
+          persistentVolumeClaim:
+            claimName: mysql-pvc
+        - name: tz
+          configMap:
+            name: tz
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql-nfs
+  labels:
+    app: mysql-nfs
+spec:
+  selector:
+    app: mysql-nfs
+  ports:
+    - port: 3306
+      targetPort: 3306
+  type: NodePort
