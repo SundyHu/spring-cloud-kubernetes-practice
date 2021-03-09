@@ -12,6 +12,7 @@
         <module>demo-service</module>
         <module>article-service</module>
         <module>product-service</module>
+        <module>order-service</module>
     </modules>
     <packaging>pom</packaging>
     <properties>
