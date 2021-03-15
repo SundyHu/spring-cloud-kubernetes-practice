@@ -566,7 +566,7 @@ kubeadm config images pull --config /root/new.yaml
 所有节点设置开机自启动kubelet
 
 ```bash
-systemctl enable --now kubelet（如果启动失败无需管理，初始化成功以后即可启动）
+systemctl enable --now kubelet #（如果启动失败无需管理，初始化成功以后即可启动）
 ```
 
 Master01节点初始化，初始化以后会在/etc/kubernetes目录下生成对应的证书和配置文件，之后其他Master节点加入Master01即可：
