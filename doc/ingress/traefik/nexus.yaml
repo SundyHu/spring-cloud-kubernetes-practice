@@ -1,0 +1,124 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: sonatype-nexus
+  labels:
+    app: sonatype-nexus
+spec:
+  accessModes:
+    - ReadWriteOnce
+  capacity:
+    storage: 5Gi
+  mountOptions:
+    - hard
+    - nfsvers=4.1
+  nfs:
+    path: /data/k8snfs/nexus
+    server: 192.168.2.107
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: sonatype-nexus
+  labels:
+    app: sonatype-nexus
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+  selector:
+    matchLabels:
+      app: sonatype-nexus
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sonatype-nexus
+  labels:
+    app: sonatype-nexus
+spec:
+  selector:
+    app: sonatype-nexus
+  ports:
+    - name: sonatype-nexus
+      port: 8081
+      protocol: TCP
+      targetPort: 8081
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sonatype-nexus
+  labels:
+    app: sonatype-nexus
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sonatype-nexus
+  template:
+    metadata:
+      labels:
+        app: sonatype-nexus
+    spec:
+      containers:
+        - name: sonatype-nexus
+          image: sonatype/nexus3:3.17.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8081
+              name: server
+          livenessProbe:
+            httpGet:
+              port: 8081
+              path: /
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            failureThreshold: 6
+          readinessProbe:
+            httpGet:
+              port: 8081
+              path: /
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            failureThreshold: 6
+          env:
+            - name: INSTALL4J_ADD_VM_PARAMS
+              value: "
+                        -Xms1200M
+                        -Xmx1200M
+                        -XX:MaxDirectMemorySize=2G
+                        -XX:+UnlockExperimentalVMOptions
+                        -XX:+UseCGroupMemoryLimitForHeap
+                      "
+          resources:
+            limits:
+              cpu: 1000m
+              memory: 2048Mi
+            requests:
+              cpu: 500m
+              memory: 1024Mi
+          volumeMounts:
+            - mountPath: /nexus-data
+              name: sonatype-nexus-data
+      volumes:
+        - name: sonatype-nexus-data
+          persistentVolumeClaim:
+            claimName: sonatype-nexus
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: nexus-ingress
+  annotations:
+    kubernetes.io/ingress.class: traefik
+spec:
+  rules:
+    - host: nexus.hkicloud.com
+      http:
+        paths:
+          - backend:
+              serviceName: sonatype-nexus
+              servicePort: 8081
